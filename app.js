@@ -3,6 +3,7 @@ import { Telegraf } from 'telegraf';
 import dotenv from 'dotenv'
 dotenv.config();
 
+const startEpoch = process.env.EPOCH_START;
 const chatId = process.env.CHAT_ID;
 const witnetExplorer = process.env.WITNET_EXPLORER;
 const whaleThreshold = process.env.WHALE_THRESHOLD;
@@ -112,7 +113,11 @@ const getLastConfirmedEpoch = async () => {
 const explorerScanner = async () => {
   let lastReadEpoch = null;
   while (lastReadEpoch == null) {
-    lastReadEpoch = await getLastConfirmedEpoch() - 1;
+    if (startEpoch == -1) {
+      lastReadEpoch = await getLastConfirmedEpoch() - 1;
+    } else {
+      lastReadEpoch=startEpoch;
+    }
 
     if (lastReadEpoch == null) {
       await sleep(10000);
