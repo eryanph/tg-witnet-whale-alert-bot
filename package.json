@@ -1,0 +1,22 @@
+{
+  "name": "tg-witnet-whale-alert",
+  "version": "1.0.0",
+  "description": "Telegram bot for Witnet network whale alerts.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "keywords": [
+    "witnet",
+    "bot",
+    "alert"
+  ],
+  "author": "eryanph",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.25.0",
+    "dotenv": "^14.3.2",
+    "telegraf": "^4.6.0"
+  }
+}
