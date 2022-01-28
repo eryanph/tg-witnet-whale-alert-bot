@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 dotenv.config();
 
 const startEpoch = process.env.EPOCH_START;
-const chatId = process.env.CHAT_ID;
+const chatIds = process.env.CHAT_ID.split(",");
 const witnetExplorer = process.env.WITNET_EXPLORER;
 const whaleThreshold = process.env.WHALE_THRESHOLD;
 const bot = new Telegraf(process.env.BOT_TOKEN);
@@ -116,7 +116,7 @@ const explorerScanner = async () => {
     if (startEpoch == -1) {
       lastReadEpoch = await getLastConfirmedEpoch() - 1;
     } else {
-      lastReadEpoch=startEpoch;
+      lastReadEpoch = startEpoch;
     }
 
     if (lastReadEpoch == null) {
@@ -165,7 +165,9 @@ const explorerScanner = async () => {
                     console.log('- exceeded threshold. sending alert...')
 
                     const msg = constructTgMessage(hash, value);
-                    await bot.telegram.sendMessage(chatId, msg, {parse_mode: 'html'})
+                    for (const chatId of chatIds) {
+                      await bot.telegram.sendMessage(chatId, msg, {parse_mode: 'html'})
+                    }
                   }
 
                   await sleep(5000);
