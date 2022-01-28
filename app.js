@@ -3,6 +3,8 @@ import { Telegraf } from 'telegraf';
 import dotenv from 'dotenv'
 dotenv.config();
 
+const MAX_TRIES = 3;
+const explorerSleepTime = parseInt(process.env.EXPLORER_SLEEP_TIME) * 60 * 1000;
 const startEpoch = process.env.EPOCH_START;
 const chatIds = process.env.CHAT_ID.split(",");
 const witnetExplorer = process.env.WITNET_EXPLORER;
@@ -164,13 +166,26 @@ const explorerScanner = async () => {
                 console.log('- found transaction value. reading txns...');
 
                 let txns = null;
-                while (txns == null) {
+                let success = false;
+                let tries = 0;
+                while (!success && tries < MAX_TRIES) {
+                  tries += 1;
+
                   txns = await getBlockTxns(block[HASH]);
 
                   if (txns == null) {
-                    await sleep(10000);
-                    console.log('- retrying reading txns...');
+                    if (tries < MAX_TRIES) {
+                      await sleep(5000);
+                      console.log('- retrying reading txns...');
+                    }
+                  } else {
+                    success = true;
                   }
+                }
+
+                if (!success) {
+                  console.log('- failed to read txns');
+                  continue;
                 }
 
                 for (const txn of txns) {
@@ -183,7 +198,26 @@ const explorerScanner = async () => {
 
                     const msg = constructTgMessage(hash, value);
                     for (const chatId of chatIds) {
-                      await bot.telegram.sendMessage(chatId, msg, {parse_mode: 'html', disable_web_page_preview: true})
+                      let success = false;
+                      let tries = 0;
+                      while (!success && tries < MAX_TRIES) {
+                        tries += 1;
+
+                        try {
+                          await bot.telegram.sendMessage(chatId, msg, {parse_mode: 'html', disable_web_page_preview: true});
+                          success = true;
+                        } catch (err) {
+                          console.log(err);
+                          if (tries < MAX_TRIES) {
+                            await sleep(5000);
+                            console.log('- retrying sending alert...');
+                          }
+                        }
+                      }
+
+                      if (!success) {
+                        console.log('- failed to send alert')
+                      }
                     }
                   }
 
@@ -196,7 +230,7 @@ const explorerScanner = async () => {
       }
     }
 
-    await sleep(10000);
+    await sleep(explorerSleepTime);
   }
 }
 
