@@ -183,7 +183,7 @@ const explorerScanner = async () => {
 
                     const msg = constructTgMessage(hash, value);
                     for (const chatId of chatIds) {
-                      await bot.telegram.sendMessage(chatId, msg, {parse_mode: 'html'})
+                      await bot.telegram.sendMessage(chatId, msg, {parse_mode: 'html', disable_web_page_preview: true})
                     }
                   }
 
