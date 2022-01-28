@@ -4,16 +4,16 @@ import dotenv from 'dotenv'
 dotenv.config();
 
 const MAX_TRIES = 3;
-const explorerSleepTime = parseInt(process.env.EXPLORER_SLEEP_TIME) * 60 * 1000;
-const startEpoch = process.env.EPOCH_START;
-const chatIds = process.env.CHAT_ID.split(",");
-const witnetExplorer = process.env.WITNET_EXPLORER;
-const whaleThreshold = process.env.WHALE_THRESHOLD;
+const EXPLORER_SLEEP_TIME = parseInt(process.env.EXPLORER_SLEEP_TIME) * 60 * 1000;
+const EPOCH_START = process.env.EPOCH_START;
+const CHAT_IDS = process.env.CHAT_ID.split(",");
+const WITNET_EXPLORER = process.env.WITNET_EXPLORER;
+const WHALE_THRESHOLD = process.env.WHALE_THRESHOLD;
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const explorerClient = axios.create({
   timeout: 30000,
-  baseURL: witnetExplorer
+  baseURL: WITNET_EXPLORER
 })
 
 const HASH = 0;
@@ -21,9 +21,9 @@ const EPOCH = 1;
 const TRANSACTION_VALUE = 4;
 const CONFIRMATION = 10;
 
-const BLUE_WHALE_TIER = whaleThreshold * 2;
-const KRAKEN_TIER = whaleThreshold * 10;
-const LEVIATHAN_TIER = whaleThreshold * 20;
+const BLUE_WHALE_TIER = WHALE_THRESHOLD * 2;
+const KRAKEN_TIER = WHALE_THRESHOLD * 10;
+const LEVIATHAN_TIER = WHALE_THRESHOLD * 20;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -54,7 +54,7 @@ const constructTgMessage = (hash, value) => {
   let msg = '🐳🐳 <b>WHALE ALERT</b> 🐳🐳\n\n';
   msg += `${getWhaleTier(value)}\n\n`;
   msg += `A TXN involving <code>${value.toLocaleString()} WIT</code> has occurred.\n\n`;
-  msg += `🔍 ${witnetExplorer}/search/${hash}`;
+  msg += `🔍 ${WITNET_EXPLORER}/search/${hash}`;
   return msg;
 }
 
@@ -132,10 +132,10 @@ const getLastConfirmedEpoch = async () => {
 const explorerScanner = async () => {
   let lastReadEpoch = null;
   while (lastReadEpoch == null) {
-    if (startEpoch == -1) {
+    if (EPOCH_START == -1) {
       lastReadEpoch = await getLastConfirmedEpoch() - 1;
     } else {
-      lastReadEpoch = startEpoch;
+      lastReadEpoch = EPOCH_START;
     }
 
     if (lastReadEpoch == null) {
@@ -193,11 +193,11 @@ const explorerScanner = async () => {
                   console.log(`- reading txn ${hash}`);
 
                   const value = txn.value * 1e-9;
-                  if (value >= whaleThreshold) {
+                  if (value >= WHALE_THRESHOLD) {
                     console.log('- exceeded threshold. sending alert...')
 
                     const msg = constructTgMessage(hash, value);
-                    for (const chatId of chatIds) {
+                    for (const chatId of CHAT_IDS) {
                       let success = false;
                       let tries = 0;
                       while (!success && tries < MAX_TRIES) {
@@ -230,7 +230,7 @@ const explorerScanner = async () => {
       }
     }
 
-    await sleep(explorerSleepTime);
+    await sleep(EXPLORER_SLEEP_TIME);
   }
 }
 
