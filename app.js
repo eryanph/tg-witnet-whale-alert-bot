@@ -19,6 +19,10 @@ const EPOCH = 1;
 const TRANSACTION_VALUE = 4;
 const CONFIRMATION = 10;
 
+const BLUE_WHALE_TIER = whaleThreshold * 2;
+const KRAKEN_TIER = whaleThreshold * 10;
+const LEVIATHAN_TIER = whaleThreshold * 20;
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const request = (url) => new Promise(async (resolve) => {
@@ -32,8 +36,21 @@ const request = (url) => new Promise(async (resolve) => {
     });
 });
 
+const getWhaleTier = (value) => {
+  if (value < BLUE_WHALE_TIER) {
+    return 'A <code>[humpback whale]</code> has made its move!';
+  } else if (value < KRAKEN_TIER) {
+    return 'A <code>[blue whale]</code> has made its appearance!';
+  } else if (value < LEVIATHAN_TIER) {
+    return 'A <code>[kraken]</code> has made its move!';
+  } else {
+    return 'A <code>[leviathan]</code> has revealed itself!';
+  }
+}
+
 const constructTgMessage = (hash, value) => {
   let msg = '🐳🐳 <b>WHALE ALERT</b> 🐳🐳\n\n';
+  msg += `${getWhaleTier(value)}\n\n`;
   msg += `A TXN involving <code>${value.toLocaleString()} WIT</code> has occurred.\n\n`;
   msg += `🔍 ${witnetExplorer}/search/${hash}`;
   return msg;
