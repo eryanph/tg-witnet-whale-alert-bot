@@ -54,7 +54,7 @@ const constructTgMessage = (hash, value) => {
   let msg = '🐳🐳 <b>WHALE ALERT</b> 🐳🐳\n\n';
   msg += `${getWhaleTier(value)}\n\n`;
   msg += `A TXN involving <code>${value.toLocaleString()} WIT</code> has occurred.\n\n`;
-  msg += `🔍 ${WITNET_EXPLORER}/search/${hash}`;
+  msg += `🔍 <a href='${WITNET_EXPLORER}/search/${hash}'>More info</a>`;
   return msg;
 }
 
